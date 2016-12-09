@@ -30,15 +30,15 @@ directions = {  'U': (-1, 0),
 MAXHEIGHT = 2
 MAXWIDTH  = 2
 DOOR = [[1,2,3],[4,5,6],[7,8,9]]
-DOOR = ["  1  ", " 234 ", "569789", " ABC ", "  D  "]
+DOOR = ["  1  ", " 234 ", "56789", " ABC ", "  D  "]
 
 curPos = (2,0) # Where the 5 is in the diamond
 
 code = []
-instructions = '''ULL
-RRDDD
-LURDL
-UUUUD'''.split()
+#instructions = '''ULL
+#RRDDD
+#LURDL
+#UUUUD'''.split()
 
 def isValid(pos):
     """ As this is now a diamond, some more smarts are needed """
@@ -70,7 +70,7 @@ for line in instructions:
         continue
     for step in line:
         curPos = move(step, curPos)
-        print(curPos, step)
+        print(curPos, step, DOOR[curPos[0]][curPos[1]])
     code.append(DOOR[curPos[0]][curPos[1]])     # Beware the order here!
     print("Added {} at pos {}".format(code[-1], curPos))
 
