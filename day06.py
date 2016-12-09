@@ -28,4 +28,4 @@ for i in range( len( message[0] ) ):
     col = [x[i] for x in message]
     c = Counter(col)
     # get the value of the most common letter
-    print( c.most_common(1)[0][0], end='' )
+    print( c.most_common()[-1][0], end='' )
