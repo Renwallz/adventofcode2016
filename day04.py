@@ -13,8 +13,7 @@ with open('day04.in') as f:
     ROOMS = f.readlines()
 
 PARSER = re.compile(r'^([a-z\-]+)(\d+)\[(\w{5})\]$')
-
-totalSectorSum = 0
+ALPHABET = [chr(x) for x in range(ord('a'), ord('z') + 1)]
 
 def isValidRoom(name, checksum):
     name = name.replace('-', '')
@@ -23,15 +22,27 @@ def isValidRoom(name, checksum):
     lists.sort(key=lambda x: x[1], reverse=True)        # Sort by count
     generatedChecksum = ''.join(x[0] for x in lists[:5])
     return generatedChecksum == checksum
+    
+def rotate(string, amount):
+    newstring = []
+    for c in string:
+        if c in ALPHABET:
+            # find the letter at {amount} offset in the ALPHABET list
+            newstring.append( ALPHABET[(ord(c) - ord('a') + amount) % len(ALPHABET)] )
+        else:
+            newstring.append( c )
+    return ''.join(newstring)
 
+    
 for room in ROOMS:
     m = PARSER.match(room)
     if m:
         name, number, checksum = m.groups()
         number = int(number)
         if isValidRoom(name, checksum):
-            totalSectorSum += number
+            rotAmount = number % len(ALPHABET)
+            decypheredName = rotate(name, rotAmount)
+            if 'north' in decypheredName:
+                print (decypheredName, number)
     else:
         raise ValueError("Unexpected Value: {}".format(room))
-        
-print("The sum of the sector IDs is {}".format(totalSectorSum))
