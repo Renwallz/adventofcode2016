@@ -12,23 +12,26 @@ searchTLSNotWithinBrackets = re.compile(r'''
     
 searchTLSPairs = re.compile(r'(\w)(.(?!\1))\2\1') # See regex above for the explanation of (.(?!\1))
 
-
-
-searchSSLWithinBracketsTemplate = r'''
-    \[ 
-        [^ \] ]*    # keep looking until the next closing bracket    
-        {}          # where the value to search for will be placed
-    .*\]'''
-
-searchSSLPairs = re.compile(r'''
-    (?:^|])             # start or after a closing ] (non capturing group)  
-    [^ \[ ]*            # look for 0 or more not-[
-    (?P<ABA>            # named group ABA
-        (\w)            # group 2
-        (?!\[|\]|\2)    # positive lookahead for not '[', ']' or group 2
-        .               # take the middle char
-        \2
-    )''', re.VERBOSE) 
+supernetExtractor = re.compile(r'''
+    (?:^|\])                    # start or ]
+    (?P<content> [^ \[ ]+ )     # everything that's not a [
+    (?:\[|$)                    # [ or end of line ]
+    ''', re.VERBOSE )
+    
+hypernetExtractor = re.compile(r'''
+    \[
+        (?P<content> [^ \] ]+ )
+    \]
+    ''', re.VERBOSE )
+    
+tripletExtractor = re.compile(r'''
+    (?=                     # positive lookahead without consuming
+        (?P<triplet>        # capture the lookahead into <triplet>
+            (\w)            # first letter
+            (?!\2).         # second letter if it is not the same as the first
+            \2              # first a second time
+        )
+    )''', re.VERBOSE)
 
 total = 0
 
@@ -50,20 +53,20 @@ def checkIPForTLS(ip):
     return False
 
 def checkIPForSSL(ip):
-    m = searchSSLPairs.finditer(ip)
-    if m:
-        for match in m:
-            aba = match.group('ABA')
-            bab = '{}{}{}'.format(aba[1], aba[0], aba[1])
-            if re.search( searchSSLWithinBracketsTemplate.format(bab), ip, re.VERBOSE ): # too much java :(
-                return True
+    supernet = '---'.join( x.group('content') for x in supernetExtractor.finditer(ip) ) 
+    hypernet = '---'.join( x.group('content') for x in hypernetExtractor.finditer(ip) ) 
+    
+    for match in tripletExtractor.finditer(supernet):
+        aba = match.group('triplet')
+        bab = '{}{}{}'.format(aba[1], aba[0], aba[1])
+        if bab in hypernet:
+            return True
     return False
     
     
 for t in testSSL:
     print(t, checkIPForSSL(t))
     
- 1/0
 
 with open('day07.in') as f:
     for line in f:
